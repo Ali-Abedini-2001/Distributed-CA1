@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package order_management;
+
+service OrderManagement {
+  //unary
+  rpc GetUnaryOrder (OrderRequest) returns (OrderResponse);
+
+  //server streaming
+  rpc GetSSOrder (OrderRequest) returns (stream OrderResponse);
+
+  // client streaming
+  rpc GetCSOrder (stream OrderRequest) returns (OrderResponse);
+
+  //bidirectional
+  rpc GetBothOrder (stream OrderRequest) returns (stream OrderResponse);
+}
+
+message OrderRequest {
+  string item = 1;
+}
+
+message OrderResponse {
+  string item = 1;
+  string timestamp = 2;
+}
+
+message DelayedReply {
+	string item = 1;
+	repeated OrderRequest request = 2;
+}
