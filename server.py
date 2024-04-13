@@ -23,7 +23,7 @@ class OrderManagementServicer(order_management_python_pb2_grpc.OrderManagementSe
         print("GetUnaryOrder Request Made:")
         print(request)
         for order in server_orders:
-            if request.item == order :
+            if request.item.lower() in order.lower() :
                 order_response = order_management_python_pb2.OrderResponse(
                     item=order, timestamp=time.ctime()
                 )
@@ -47,12 +47,11 @@ class OrderManagementServicer(order_management_python_pb2_grpc.OrderManagementSe
 
         for i in range(3):
             for order in server_orders:
-                if request.item == order : 
+                if request.item.lower() in order.lower() : 
                     order_response = order_management_python_pb2.OrderResponse(
-                    item=order , timestamp=time.ctime()
+                    item=order + f" {i+1}" , timestamp=time.ctime()
                 )
-                    # order_response.item = f"{request.item} {i + 1}"
-                    # order_response.timestamp = f"{request.time.ctime()}"
+                    
                     yield order_response
                     time.sleep(3)
 
@@ -73,12 +72,12 @@ class OrderManagementServicer(order_management_python_pb2_grpc.OrderManagementSe
         delayed_reply = order_management_python_pb2.DelayedReply()
         for request in request_iterator:
             for order in server_orders:
-                if request.item == order:
+                if request.item.lower() in order.lower():
                     print("GetCSOrder Request Made:")
-                    print(request)
+                    print(order)
                     delayed_reply.request.append(request)
 
-        delayed_reply.item = f"You have sent {len(delayed_reply.request)} messages. Please expect a delayed response."
+        delayed_reply.item = f"You have sent {len(delayed_reply.request)} items. Please expect a delayed response."
         return delayed_reply
 
     def GetBothOrder(self, request_iterator, context):
@@ -96,14 +95,14 @@ class OrderManagementServicer(order_management_python_pb2_grpc.OrderManagementSe
         ]
         for request in request_iterator:
             for server_order in server_orders:
-                if request.item == server_order:
+                if request.item.lower() in server_order.lower():
                     print("GetBothOrder Request Made:")
-                    print(request)
+                    print(server_order)
                     yield order_management_python_pb2.OrderResponse(
                         item=server_order, timestamp=time.ctime()
                         )
 
-def serve():
+def server():
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     order_management_python_pb2_grpc.add_OrderManagementServicer_to_server(
         OrderManagementServicer(), server
@@ -114,4 +113,4 @@ def serve():
 
 
 if __name__ == "__main__":
-    serve()
+    server()
